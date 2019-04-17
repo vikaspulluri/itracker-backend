@@ -10,4 +10,5 @@ router.post('/add', decodeToken,
                     validateRequest('NC-AN-1', 'message', 'sender', 'type', 'status', 'receivers'),
                     notificationController.addNotification)
 
+router.post('/all', decodeToken, checkUser, notificationController.getNotifications);
 module.exports = router;

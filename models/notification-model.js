@@ -20,7 +20,8 @@ const NotificationSchema = mongoose.Schema({
     id: String,
     title: String
   }, required: false},
-  priority: {type: String, required: true} // low or high
+  priority: {type: String, required: true}, // low or high
+  createdDate: {type: Date, required: true, default: Date.now}
 });
 
 module.exports = mongoose.model('Notification', NotificationSchema);

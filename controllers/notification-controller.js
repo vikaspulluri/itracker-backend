@@ -37,6 +37,32 @@ const addNotification = (req, res, next) => {
         })
 }
 
+const getNotifications = (req, res, next) => {
+    let queryObj = {};
+    if (req.body.status) {
+        queryObj.status = req.body.status;
+    }
+    if (req.body.priority) {
+        queryObj.priority = req.body.priority;
+    }
+    Notification.find(queryObj)
+                .sort({_id: -1})
+                .exec()
+                .then(docs => {
+                     let response = new SuccessResponseBuilder('Notification added successfully!!!')
+                        .status(200)
+                        .data(docs)
+                        .build();
+                    return res.status(200).send(response);
+                })
+                 .catch(error => {
+                    logger.log(error, req, 'NC-GN-1');
+                    let err = new ErrorResponseBuilder().status(500).errorCode('NC-GN-1').errorType('UnknownError').build();
+                    return next(err);
+                })
+}
+
 module.exports = {
-    addNotification: addNotification
+    addNotification: addNotification,
+    getNotifications: getNotifications
 }
