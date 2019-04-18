@@ -38,7 +38,9 @@ const addNotification = (req, res, next) => {
 }
 
 const getNotifications = (req, res, next) => {
-    let queryObj = {};
+    let queryObj = {
+        userId: req.userData.userId
+    };
     if (req.body.status) {
         queryObj.status = req.body.status;
     }
@@ -62,7 +64,29 @@ const getNotifications = (req, res, next) => {
                 })
 }
 
+const updateNotification = (req, res, next) => {
+    let queryObj = {userId: req.userData.userId};
+    let criteria = req.body.criteria; // single or null
+    if (criteria) {
+        queryObj._id = req.body.notificationId;
+    }
+    Notification.updateMany(queryObj, {$set: {status: 'read'}}, {multi: true, new: true})
+                .then(docs => {
+                    let response = new SuccessResponseBuilder('Notifications updated successfully!!!')
+                    .status(200)
+                    .data({})
+                    .build();
+                    return res.status(200).send(response);
+                })
+                .catch(error => {
+                    logger.log(error, req, 'NC-UN-1');
+                    let err = new ErrorResponseBuilder().status(500).errorCode('NC-UN-1').errorType('UnknownError').build();
+                    return next(err);
+                })
+}
+
 module.exports = {
     addNotification: addNotification,
-    getNotifications: getNotifications
+    getNotifications: getNotifications,
+    updateNotification: updateNotification
 }

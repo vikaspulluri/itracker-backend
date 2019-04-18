@@ -11,4 +11,7 @@ router.post('/add', decodeToken,
                     notificationController.addNotification)
 
 router.post('/all', decodeToken, checkUser, notificationController.getNotifications);
+
+router.post('/update', decodeToken, checkUser, notificationController.updateNotification);
+
 module.exports = router;
