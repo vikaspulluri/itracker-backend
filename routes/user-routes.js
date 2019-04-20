@@ -353,7 +353,7 @@ router.post('/update', decodeToken, checkUser, userController.updateUserPersonal
  *      "errorType": "UnknownError"
  *    }
  */
-router.post('/request-password', userController.requestUserPassword);
+router.post('/request-password', validateRequest('UC-RUP', 'email'), userController.requestUserPassword);
 
 /**
  * @apiVersion 1.0.0
@@ -391,6 +391,8 @@ router.post('/request-password', userController.requestUserPassword);
  *      "errorType": "UnknownError"
  *    }
  */
-router.post('/reset-password', userController.resetPassword);
+router.post('/reset-password', validateRequest('UC-RSP', 'verificationCode', 'newPassword'), userController.resetPassword);
+
+router.post('/social-login', validateRequest('UC-SLU', 'firstName', 'lastName', 'email'), userController.socialLoginUser);
 
 module.exports = router;

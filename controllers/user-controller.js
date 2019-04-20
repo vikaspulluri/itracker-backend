@@ -4,7 +4,6 @@ const Feedback = require('../models/feedback-model');
 const bcrypt = require('bcryptjs');
 const {ErrorResponseBuilder, SuccessResponseBuilder} = require('../libraries/response-builder');
 const jwt = require('jsonwebtoken');
-const validateRequest = require('../libraries/validate-request');
 const dateUtility = require('../libraries/date-formatter');
 const logger = require('../libraries/log-message');
 const mailService = require('../libraries/mail-service');
@@ -75,7 +74,8 @@ const loginUser = (req, res, next) => {
                 expiryDuration: 7200,
                 username: fetchedUser.firstName + ' ' + fetchedUser.lastName,
                 userId: fetchedUser._id,
-                loginCount: fetchedUser.loginCount
+                loginCount: fetchedUser.loginCount,
+                isSocialAuthUser: false
             };
             incrementLoginCount(req.body.email, req, next);
             let jsonResponse = new SuccessResponseBuilder('User Logged In Successfully...').data(data).build();
@@ -99,6 +99,87 @@ const incrementLoginCount = (email, req, next) => {
       let err = new ErrorResponseBuilder().status(500).errorCode('UC-UUPI-3').errorType('UnknownError').build();
       return next(err);
     })
+}
+
+const socialLoginUser = (req, res, next) => {
+  User.findOne({email: req.body.email}, {isSocialAuthUser: 1, email: 1, firstName: 1, lastName: 1, loginCount: 1})
+      .then(document => {
+        return document;
+      })
+      .then(result => {
+        if (result && result._id) {
+          if (result.isSocialAuthUser && result.isSocialAuthUser == true) {
+            const token = jwt.sign({email: result.email, firstName: result.firstName, lastName: result.lastName, id: result._id, isAdmin: result.hasAdminPrevilieges}, process.env.JWT_KEY, {expiresIn: '2h'});
+            const data = {
+                token: token,
+                expiryDuration: 7200,
+                username: result.firstName + ' ' + result.lastName,
+                userId: result._id,
+                loginCount: result.loginCount,
+                isSocialAuthUser: true
+            };
+            incrementLoginCount(req.body.email, req, next);
+            let jsonResponse = new SuccessResponseBuilder('User Logged In Successfully...').data(data).build();
+            return res.status(200).send(jsonResponse);
+          } else {
+            let error = new ErrorResponseBuilder('Email is already registered in the application. Please sign in from normal login')
+                                        .status(400)
+                                        .errorType('OAuthError')
+                                        .errorCode('UC-SLU-1')
+                                        .build();
+            return next(error);
+          }
+        } else {
+          // new user
+          const user = new User({
+            email: req.body.email,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            password: process.env.SECURE_PWD,
+            isSocialAuthUser: true
+          });
+          user.save()
+              .then(data => {
+                const token = jwt.sign({email: data.email, firstName: data.firstName, lastName: data.lastName, id: data._id, isAdmin: data.hasAdminPrevilieges}, process.env.JWT_KEY, {expiresIn: '2h'});
+                const obj = {
+                    token: token,
+                    expiryDuration: 7200,
+                    username: data.firstName + ' ' + data.lastName,
+                    userId: data._id,
+                    loginCount: data.loginCount,
+                    isSocialAuthUser: true
+                };
+                let userBasicData = {
+                  userId: data._id,
+                  firstName: data.firstName,
+                  lastName: data.lastName
+                };
+                addMemberToDefaultProject(userBasicData);
+                incrementLoginCount(req.body.email, req, next);
+                let jsonResponse = new SuccessResponseBuilder('User Logged In Successfully...').data(obj).build();
+                return res.status(200).send(jsonResponse);
+              })
+              .catch(error => {
+                logger.log(error, req, 'UC-SLU');
+                let err = new ErrorResponseBuilder().status(500).errorCode('UC-SLU-5').errorType('UnknownError').build();
+                return next(err);
+              });
+        }
+      })
+      .catch(error => {
+        logger.log(error, req, 'UC-SLU');
+        let err = new ErrorResponseBuilder().status(500).errorCode('UC-SLU-1').errorType('UnknownError').build();
+        return next(err);
+      });
+  // check if user exists in our database
+  /*if (userExists) {
+      if (isSocialAuthUser) proceed with socialLogin
+      else => throw an user already registered with this email id  
+  } else {
+    createSocialUser with dummy password, add isSocialAuthUser = true,
+    send the login response
+  }
+  */
 }
 
 const getUserStats = (req, res, next) => {
@@ -218,11 +299,6 @@ const sendUserFeedback = (req, res, next) => {
 }
 
 const updateUserPersonalInfo = (req, res, next) => {
-  let reqValidity = validateRequest(req, 'firstName','lastName');
-  if(reqValidity.includes(false)) {
-      let error = new ErrorResponseBuilder('Invalid request').errorType('DataValidationError').status(400).errorCode('UC-UUPI-1').build();
-      return next(error);
-  }
   User.findOneAndUpdate({_id: req.userData.userId},
                         {$set: {firstName: req.body.firstName, lastName: req.body.lastName}},
                         {new: true})
@@ -249,11 +325,6 @@ const updateUserPersonalInfo = (req, res, next) => {
 }
 
 const requestUserPassword = (req, res, next) => {
-  let reqValidity = validateRequest(req, 'email');
-  if(reqValidity.includes(false)) {
-    let error = new ErrorResponseBuilder('Invalid request').errorType('DataValidationError').status(400).errorCode('UC-RUP-1').build();
-    return next(error);
-  }
   User.countDocuments({email: req.body.email})
       .exec()
       .then(docsCount => {
@@ -281,11 +352,6 @@ const requestUserPassword = (req, res, next) => {
 }
 
 const resetPassword = (req, res, next) => {
-  let reqValidity = validateRequest(req, 'verificationCode', 'newPassword');
-  if(reqValidity.includes(false)) {
-    let error = new ErrorResponseBuilder('Invalid request').errorType('DataValidationError').status(400).errorCode('UC-RP-1').build();
-    return next(error);
-  }
   const token = `${req.body.verificationCode}`;
   let decodedToken = '';
   // jwt.verify in synchronous mode will throw error incase of invalid token
@@ -327,5 +393,6 @@ module.exports = {
   sendUserFeedback: sendUserFeedback,
   updateUserPersonalInfo: updateUserPersonalInfo,
   requestUserPassword: requestUserPassword,
-  resetPassword: resetPassword
+  resetPassword: resetPassword,
+  socialLoginUser: socialLoginUser
 }

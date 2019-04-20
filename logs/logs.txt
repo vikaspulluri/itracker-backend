@@ -38,3 +38,8 @@
 {"time":"April 14th 2019, 3:21:46 pm","client":"::1","error":"{\"name\":\"No match found\"}","fn":"IC-GIBI-1"}
 {"time":"April 17th 2019, 9:54:19 am","client":"::1","error":"{\"name\":\"No match found\"}","fn":"IC-GIBI-1"}
 {"time":"April 17th 2019, 9:54:51 am","client":"::1","error":"{\"name\":\"No match found\"}","fn":"IC-GIBI-1"}
+{"time":"April 19th 2019, 9:28:16 pm","client":"::1","error":"{\"ok\":0,\"errmsg\":\"user is not allowed to do action [find] on [itracker.users]\",\"code\":8000,\"codeName\":\"AtlasError\",\"name\":\"MongoError\"}","fn":"UC-GAU"}
+{"time":"April 19th 2019, 9:29:00 pm","client":"::1","error":"{\"ok\":0,\"errmsg\":\"user is not allowed to do action [find] on [itracker.issues]\",\"code\":8000,\"codeName\":\"AtlasError\",\"name\":\"MongoError\"}","fn":"IC-GS-1"}
+{"time":"April 19th 2019, 9:29:26 pm","client":"::1","error":"{\"ok\":0,\"errmsg\":\"user is not allowed to do action [find] on [itracker.projects]\",\"code\":8000,\"codeName\":\"AtlasError\",\"name\":\"MongoError\"}","fn":"PC-GUS"}
+{"time":"April 19th 2019, 9:29:42 pm","client":"::1","error":"{\"ok\":0,\"errmsg\":\"user is not allowed to do action [find] on [itracker.users]\",\"code\":8000,\"codeName\":\"AtlasError\",\"name\":\"MongoError\"}","fn":"UC-GAU"}
+{"time":"April 19th 2019, 9:29:42 pm","client":"::1","error":"{\"ok\":0,\"errmsg\":\"user is not allowed to do action [find] on [itracker.projects]\",\"code\":8000,\"codeName\":\"AtlasError\",\"name\":\"MongoError\"}","fn":"PC-GUS"}
