@@ -56,6 +56,14 @@ const loginUser = (req, res, next) => {
                                         .build();
             return next(error);
           }
+          if (user && user.isSocialAuthUser == true) {
+            let error = new ErrorResponseBuilder('This Email ID is registered with social authentication. Please sign in through google authentication')
+                              .status(400)
+                              .errorType('OAuthError')
+                              .errorCode('UC-LU-5')
+                              .build();
+            return next(error);
+          }
           fetchedUser = user;
           return bcrypt.compare(req.body.password, fetchedUser.password);
         })
