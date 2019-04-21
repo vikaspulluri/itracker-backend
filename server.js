@@ -1,24 +1,7 @@
-
 const http = require("http");
-const debug = require("debug")("todo-list");
+const debug = require("debug")("itracker");
 const app = require("./app");
-
-
-const normalizePort = val => {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-};
+const {normalizePort} = require('./libraries/normalize-port');
 
 const onError = error => {
   if (error.syscall !== "listen") {
@@ -58,5 +41,3 @@ const socketLib = require("./libraries/socketLib");
 const socketServer = socketLib.setServer(server);
 
 server.listen(port);
-
-
