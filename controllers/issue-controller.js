@@ -10,7 +10,7 @@ const createIssue = (req, res, next) => {
     const url = req.protocol + '://' + req.get('host');
     // since we receive data in formData format, parse the JSON string into objects
     const project = parseJSON(req.body.project) || {projectId: config.defaultProject.id, title: 'Default'};
-    const assignee = parseJSON(req.body.assignee);
+    const assignee = parseJSON(req.body.assignee) || parseJSON(req.body.reporter);
     const reporter = parseJSON(req.body.reporter);
     const activity = parseJSON(req.body.activity);
     if (!(project && assignee && reporter && activity)) {
