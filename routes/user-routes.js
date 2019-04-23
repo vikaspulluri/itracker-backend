@@ -18,8 +18,6 @@ const users = require('../models/user-model');
  * @apiParam {String} lastName  Last Name
  * @apiParam {String} email Email
  * @apiParam {String} password Password
- * @apiParam {String} country Country
- * @apiParam {String[]} [phone] Phone Numbers
  *
  * @apiHeader {String} [isadmin] Create an account with admin previleges
  *
@@ -33,8 +31,8 @@ const users = require('../models/user-model');
  *          "firstName": "Vikas",
  *          "lastName": "Pulluri",
  *          "email": "vikasiiitn@gmail.com",
- *          "country": "India",
- *          "phone": [91 9494336401]
+ *          "hasAdminPrivilieges": false,
+ *          "loginCount": 0
  *      }
  *@apiErrorExample {json} Error Response-1
  *    HTTP/1.1 400 BAD REQUEST
@@ -83,8 +81,9 @@ router.post('/create', uniqueValidator(users,'email'), validateRequest('UC-CU-1'
  *          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InZpa2FzaWlpdG5AZ21haWwuY29tIiwiaWQiOiI1Yjk2YWRjNDc0NGQ0ZTFhMzhjZjJhOGEiLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE1MzcyMTMwNjQsImV4cCI6MTUzNzIxNjY2NH0.2U_A27fPZPgkqN1DaS9fg_C6qr5AUeU7rRsO6yQk1uQ",
  *          "username": "Vikas Pulluri",
  *          "email": "vikasiiitn@gmail.com",
- *          "expiryDuration": 3600,
- *          "userId": "5b96adc4744d4e1a38cf2a8a"
+ *          "expiryDuration": 7200,
+ *          "userId": "5b96adc4744d4e1a38cf2a8a",
+ *          "loginCount": 1
  *      }
  * @apiErrorExample {json} Error Response-1
  *    HTTP/1.1 400 BAD REQUEST
@@ -118,8 +117,85 @@ router.post('/create', uniqueValidator(users,'email'), validateRequest('UC-CU-1'
  *      "errorCode": "UC-LU-4",
  *      "errorType": "UknownError"
  *    }
+ * @apiErrorExample {json} Error Response-5
+ *    HTTP/1.1 400 BAD REQUEST
+ *    {
+ *      "error": true,
+ *      "message": "This Email ID is registered with social authentication. Please sign in through google authentication",
+ *      "errorCode": "UC-LU-5",
+ *      "errorType": "OAuthError"
+ *    }
  */
 router.post('/login', validateRequest('UC-LU-1', 'email', 'password'), userController.loginUser);
+
+/**
+ * @apiVersion 1.0.0
+ *
+ * @api {post} /api/user/social-login Social Auth User
+ * @apiName socialAuthUser
+ * @apiGroup User
+ *
+ * @apiParam {String} email Email
+ * @apiParam {String} firstName First Name
+ * @apiParam {String} lastName Last Name
+ *
+ *
+ * @apiSuccessExample {json} Success Response
+ *    HTTP/1.1 200 OK
+ *    {
+ *      "error": false,
+ *      "message": "User Logged In Successfully...",
+ *      "data": {
+ *          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InZpa2FzaWlpdG5AZ21haWwuY29tIiwiaWQiOiI1Yjk2YWRjNDc0NGQ0ZTFhMzhjZjJhOGEiLCJpc0FkbWluIjp0cnVlLCJpYXQiOjE1MzcyMTMwNjQsImV4cCI6MTUzNzIxNjY2NH0.2U_A27fPZPgkqN1DaS9fg_C6qr5AUeU7rRsO6yQk1uQ",
+ *          "username": "Vikas Pulluri",
+ *          "email": "vikasiiitn@gmail.com",
+ *          "expiryDuration": 7200,
+ *          "userId": "5b96adc4744d4e1a38cf2a8a",
+ *          "loginCount": 1
+ *      }
+ * @apiErrorExample {json} Error Response-1
+ *    HTTP/1.1 400 BAD REQUEST
+ *    {
+ *      "error": true,
+ *      "message": "Invalid Request",
+ *      "errorCode": "UC-LU-1",
+ *      "errorType": "OAuthError"
+ *    }
+ * @apiErrorExample {json} Error Response-2
+ *    HTTP/1.1 401 UNAUTHORIZED
+ *    {
+ *      "error": true,
+ *      "message": "Invalid username provided",
+ *      "errorCode": "UC-LU-2",
+ *      "errorType": "OAuthError"
+ *    }
+ * @apiErrorExample {json} Error Response-3
+ *    HTTP/1.1 401 UNAUTHORIZED
+ *    {
+ *      "error": true,
+ *      "message": "Invalid Authentication Credentials",
+ *      "errorCode": "UC-LU-3",
+ *      "errorType": "OAuthError"
+ *    }
+ * @apiErrorExample {json} Error Response-4
+ *    HTTP/1.1 500 INTERNAL SERVER ERROR
+ *    {
+ *      "error": true,
+ *      "message": "Something went wrong, please try again later...",
+ *      "errorCode": "UC-LU-4",
+ *      "errorType": "UknownError"
+ *    }
+ * @apiErrorExample {json} Error Response-1
+ *    HTTP/1.1 400 BAD REQUEST
+ *    {
+ *      "error": true,
+ *      "message": "Email is already registered in the application. Please sign in from normal login",
+ *      "errorCode": "UC-LU-1",
+ *      "errorType": "OAuthError"
+ *    }
+ */
+router.post('/social-login', validateRequest('UC-SLU', 'firstName', 'lastName', 'email'), userController.socialLoginUser);
+
 
 /**
  * @apiVersion 1.0.0
@@ -158,6 +234,55 @@ router.post('/login', validateRequest('UC-LU-1', 'email', 'password'), userContr
  */
 router.get('/@self', decodeToken, checkUser, userController.getUser);
 
+/**
+ * @apiVersion 1.0.0
+ *
+ * @api {post} /api/user/stats Statistics
+ * @apiName userStatistics
+ * @apiGroup User
+ *
+ * @apiParam {String} userId User ID
+ *
+ *
+ * @apiSuccessExample {json} Success Response
+ *    HTTP/1.1 200 OK
+ *    {
+ *      "error": false,
+ *      "message": "User Stats Fetched Successfully!!!",
+ *      "data": {
+ *          "userId": "kleUZpo5",
+ *          "firstName": "Vikas",
+ *          "lastName": "Pulluri",
+ *          "projectDetails": [{
+ *              "title": "Default",
+ *              "projectId": "jlERlj9U"
+ *           }],
+ *      }
+ * @apiErrorExample {json} Error Response-1
+ *    HTTP/1.1 400 BAD REQUEST
+ *    {
+ *      "error": true,
+ *      "message": "Invalid Request",
+ *      "errorCode": "UC-LU-1",
+ *      "errorType": "OAuthError"
+ *    }
+ * @apiErrorExample {json} Error Response-2
+ *    HTTP/1.1 404 NOT FOUND
+ *    {
+ *      "error": true,
+ *      "message": "There is no user with id XjilerU74",
+ *      "errorCode": "UC-GUS-1",
+ *      "errorType": "DataNotFoundError"
+ *    }
+ * @apiErrorExample {json} Error Response-3
+ *    HTTP/1.1 500 INTERNAL SERVER ERROR
+ *    {
+ *      "error": true,
+ *      "message": "Something went wrong, please try again later...",
+ *      "errorCode": "UC-LU-4",
+ *      "errorType": "UknownError"
+ *    }
+ */
 router.post('/stats', decodeToken, checkUser, validateRequest('UC-GUS', 'userId'), userController.getUserStats);
 
 // only for admin purpose
@@ -392,7 +517,5 @@ router.post('/request-password', validateRequest('UC-RUP', 'email'), userControl
  *    }
  */
 router.post('/reset-password', validateRequest('UC-RSP', 'verificationCode', 'newPassword'), userController.resetPassword);
-
-router.post('/social-login', validateRequest('UC-SLU', 'firstName', 'lastName', 'email'), userController.socialLoginUser);
 
 module.exports = router;

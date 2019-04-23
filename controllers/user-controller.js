@@ -110,6 +110,15 @@ const incrementLoginCount = (email, req, next) => {
 }
 
 const socialLoginUser = (req, res, next) => {
+  // check if user exists in our database
+  /*if (userExists) {
+      if (isSocialAuthUser) proceed with socialLogin
+      else => throw an user already registered with this email id  
+  } else {
+    createSocialUser with dummy password, add isSocialAuthUser = true,
+    send the login response
+  }
+  */
   User.findOne({email: req.body.email}, {isSocialAuthUser: 1, email: 1, firstName: 1, lastName: 1, loginCount: 1})
       .then(document => {
         return document;
@@ -133,7 +142,7 @@ const socialLoginUser = (req, res, next) => {
             let error = new ErrorResponseBuilder('Email is already registered in the application. Please sign in from normal login')
                                         .status(400)
                                         .errorType('OAuthError')
-                                        .errorCode('UC-SLU-1')
+                                        .errorCode('UC-SLU-5')
                                         .build();
             return next(error);
           }
@@ -179,15 +188,6 @@ const socialLoginUser = (req, res, next) => {
         let err = new ErrorResponseBuilder().status(500).errorCode('UC-SLU-1').errorType('UnknownError').build();
         return next(err);
       });
-  // check if user exists in our database
-  /*if (userExists) {
-      if (isSocialAuthUser) proceed with socialLogin
-      else => throw an user already registered with this email id  
-  } else {
-    createSocialUser with dummy password, add isSocialAuthUser = true,
-    send the login response
-  }
-  */
 }
 
 const getUserStats = (req, res, next) => {

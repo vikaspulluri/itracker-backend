@@ -1,15 +1,17 @@
 {
-    "name": "TODO List",
+    "name": "itracker",
     "version": "1.0.0",
-    "description": "TODO List API Documentation",
-    "title": "TODO List API",
+    "description": "itracker API Documentation",
+    "title": "itracker API",
     "author": "Vikas Pulluri",
-    "created": "01-01-2019",
-    "url": "http://todolistsapi.meanpro.com",
+    "created": "22-04-2019",
+    "url": "http://itrackerapi.meanpro.com",
     "order": [
       "User",
-      "List",
-      "Item"
+      "Project",
+      "Issue",
+      "Comment",
+      "Notification"
     ],
     "template": {
       "forceLanguage": "en"
