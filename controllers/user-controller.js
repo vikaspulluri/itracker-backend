@@ -397,7 +397,6 @@ module.exports = {
   getUser: getUser,
   getUserStats: getUserStats,
   getAllUsers: getAllUsers,
-  getUserNotifications: getUserNotifications,
   sendUserFeedback: sendUserFeedback,
   updateUserPersonalInfo: updateUserPersonalInfo,
   requestUserPassword: requestUserPassword,

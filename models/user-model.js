@@ -14,7 +14,7 @@ const userSchema = mongoose.Schema({
       arrived: {type: Date, default: Date.now},
       readStatus: {type: String, default: 'unread'}
     }],
-    loginCount: {type: Number, required: false, default: 0},
+    loginCount: {type: Number, default: 0},
     isSocialAuthUser: {type: Boolean, required: true, default: false}
 });
 

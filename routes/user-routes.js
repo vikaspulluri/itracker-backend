@@ -288,52 +288,13 @@ router.post('/stats', decodeToken, checkUser, validateRequest('UC-GUS', 'userId'
 // only for admin purpose
 router.get('/all-users', decodeToken, checkUser, userController.getAllUsers);
 
-/**
- * @apiVersion 1.0.0
- *
- * @api {get} /api/user/notifications Get User Notifications
- * @apiName GetUserNotifications
- * @apiGroup User
- *
- * @apiHeader {String} authorization Authorization Token prepended with (Bearer )
- *
- *
- * * @apiSuccessExample {json} Success Response
- *    HTTP/1.1 200 OK
- *    {
- *      "error": false,
- *      "message": "User Data Fetched Successfully!!!",
- *      "data": [
- *          {"arrived":"2018-11-24T08:26:47.457Z","_id":"5bf90b475150c51564ea9167","message":"You have received a friend request from Noothana P"},
- *          {"arrived":"2018-11-24T08:27:41.682Z","_id":"5bf90b7d5150c51564ea9168","message":"You have accepted friend request of Noothana P"},
- *          {"arrived":"2018-11-24T09:39:01.950Z","_id":"5bf91c35e32e760fdcaf485e"}
- *      ]
- *    }    
- * @apiErrorExample {json} Error Response
- *    HTTP/1.1 401 UNAUTHORIZED
- *    {
- *      "error": true,
- *      "message": "Authentication Failed",
- *      "errorCode": "CA-1",
- *      "errorType": "OAuthError"
- *    }
- * @apiErrorExample {json} Error Response
- *    HTTP/1.1 500 Internal Server Error
- *    {
- *      "error": true,
- *      "message": "An unknown error occured",
- *      "errorCode": "UC-GUN-1",
- *      "errorType": "UnknownError"
- *    }
- */
-router.get('/notifications', decodeToken, checkUser, userController.getUserNotifications);
 
 /**
  * @apiVersion 1.0.0
  *
- * @apiParam {String} experience Experience with app
+ * @apiParam {String} query Type of query user has
  * @apiParam {String} userName Username
- * @apiParam {String} feedback Feedback/Suggestions text
+ * @apiParam {String} description Feedback Content
  * 
  * @api {post} /api/user/feedback Post Feedback
  * @apiName PostUserFeedback
@@ -346,7 +307,7 @@ router.get('/notifications', decodeToken, checkUser, userController.getUserNotif
  *    HTTP/1.1 200 OK
  *    {
  *      "error": false,
- *      "message": "Thanks for your time!!!",
+ *      "message": "Thanks for your time!!! We will get back to you as soon as possible",
  *      "data": []
  *    }    
  * @apiErrorExample {json} Error Response
