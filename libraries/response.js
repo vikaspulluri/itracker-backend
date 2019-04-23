@@ -10,7 +10,7 @@ class SuccessResponse {
 class ErrorResponse {
     constructor(builder) {
         this.error = builder.error || true;
-        this.message = builder.message || 'Something went wrong, please try again later!!!';
+        this.message = builder.message || 'We are sorry!, Something went wrong, please try again later!!!';
         this.status = builder.status;
         this.data = builder.data;
         this.errorCode = builder.errorCode;
