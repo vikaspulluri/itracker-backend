@@ -152,7 +152,7 @@ const socialLoginUser = (req, res, next) => {
             email: req.body.email,
             firstName: req.body.firstName,
             lastName: req.body.lastName,
-            password: process.env.SECURE_PWD,
+            password: `${process.env.SECURE_PWD}`,
             isSocialAuthUser: true
           });
           user.save()
