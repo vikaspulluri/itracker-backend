@@ -172,10 +172,61 @@ const addMemberToDefaultProject = (user) => {
     });                 
 }
 
+const addMemberToProject = (req, res, next) => {
+    Project.findOneAndUpdate({_id: req.body.projectId},
+        {$push: {members: req.body.user}})
+        .then(doc => {
+            let jsonResponse = new SuccessResponseBuilder('Member added Successfully!!!').data({}).build();
+            res.status(200).send(jsonResponse);
+        })
+        .catch(error => {
+            logger.log(error, req, 'PC-AMTP-1');
+            let err = new ErrorResponseBuilder().status(500).errorCode('PC-AMTP-1').errorType('UnknownError').build();
+            return next(err);
+        });
+}
+
+const removeMemberFromProject = (req, res, next) => {
+    Project.findOne({_id: req.body.projectId}, {members: 1})
+            .then(doc => {
+                if (doc && doc._id) {
+                    let index = doc.members.findIndex(member => member.userId === req.body.userId);
+                    if (index > -1) {
+                        let members = doc.members;
+                        members.splice(index, 1);
+                        Project.findOneAndUpdate({_id: req.body.projectId},
+                            {$set: {members: members}})
+                            .then(result => {
+                                let jsonResponse = new SuccessResponseBuilder('Member removed Successfully!!!').data({}).build();
+                                res.status(200).send(jsonResponse);
+                            })
+                            .catch(error => {
+                                logger.log(error, req, 'PC-RMFP-2');
+                                let err = new ErrorResponseBuilder().status(500).errorCode('PC-RMFP-2').errorType('UnknownError').build();
+                                return next(err);
+                            });
+                    } else {
+                        let err = new ErrorResponseBuilder('No member found with given user ID').status(404).errorCode('PC-RMFP-3').errorType('DataNotFoundError').build();
+                        return next(err);
+                    }
+                } else {
+                    let err = new ErrorResponseBuilder('No project found with given project ID').status(404).errorCode('PC-RMFP-4').errorType('DataNotFoundError').build();
+                    return next(err);
+                }
+            })
+            .catch(error => {
+                logger.log(error, req, 'PC-RMFP-1');
+                let err = new ErrorResponseBuilder().status(500).errorCode('UC-RMFP-5').errorType('UnknownError').build();
+                return next(err);
+            });
+}
+
 module.exports = {
     createProject: createProject,
     getProject: getProject,
     getProjects: getProjects,
     constructQueryForGetProjects: constructQueryForGetProjects,
-    addMemberToDefaultProject: addMemberToDefaultProject
+    addMemberToDefaultProject: addMemberToDefaultProject,
+    addMemberToProject: addMemberToProject,
+    removeMemberFromProject: removeMemberFromProject
 }
