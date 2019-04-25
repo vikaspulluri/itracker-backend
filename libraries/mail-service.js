@@ -21,7 +21,7 @@ exports.sendFeedback = (data) => {
 
   const mailOptions = {
     from: `${data.email}`,
-    to: 'vikasiiitn@gmail.com',
+    to: process.env.AUTH_MAIL_USER,
     subject: `Feedback from ${data.name} on iTracker`,
     html: `<b>Experience: </b><span>${data.query}</span><br>
             <b>Feedback: </b><span>${data.description}</span><br>
@@ -36,12 +36,12 @@ exports.sendRecoveryMail = (data) => {
   const mailOptions = {
     from: process.env.AUTH_MAIL_USER,
     to: data.email,
-    subject: `Password recovery for todolist.meanpro.com`,
+    subject: `Password recovery for itracker.meanpro.com`,
     html: `<h3>Dear User,</h3>
           <b>Verification code: </b>${data.verificationCode}<br>
           <div>Click the below link and reset password by providing your verification code.
           Note that the above code will be expired in <b>1 hour</b></div>
-          <a href="http://localhost:4200/#/reset-password">Reset Password</a>
+          <a href="http://itracker.meanpro.com/reset-password">Reset Password</a>
           `
   };
 
